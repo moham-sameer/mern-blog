@@ -1,10 +1,12 @@
-import { Button, Label, TextInput } from 'flowbite-react'
+import { Alert, Button, Label, Spinner, TextInput } from 'flowbite-react'
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 const SignUp = () => {
   const [inputData,setInputData] = useState('');
-  
+  const [loading,setLoading] = useState(false)
+  const [errorMessage,setErrorMessage] = useState(null)
+  const navigate = useNavigate()
   const changeHandler = (e) =>{
     setInputData({
       ...inputData,[e.target.id]:e.target.value
@@ -12,8 +14,25 @@ const SignUp = () => {
   }
   const submitHandler = async(e)=>{
     e.preventDefault()
-    const data = await axios.post('http://localhost:3000/api/auth/signup',inputData)
-    console.log(data)
+    if(!inputData.username || !inputData.email || !inputData.password){
+      return setErrorMessage('Please fill out all fields.')
+    }
+    try {
+      setLoading(true)
+      setErrorMessage(null)
+      const data = await axios.post('http://localhost:3000/api/auth/signup',inputData)
+      console.log(data)
+      if(data.success === false){
+        return setErrorMessage(data.message)
+      }
+      setLoading(false)
+        navigate('/signin')
+      
+    } catch (error) {
+      setErrorMessage(error.message)
+      setLoading(false)
+    }
+
   }
 
   return (
@@ -47,7 +66,16 @@ const SignUp = () => {
             <TextInput onChange={changeHandler} type='password' placeholder='Enter Your Password' 
              id='password'  />
           </div>
-           <Button gradientDuoTone='purpleToPink' type='submit' >Sign Up</Button>
+           <Button gradientDuoTone='purpleToPink' type='submit' disabled={loading} >
+            {
+              loading ? (
+                <>
+                <Spinner size='sm'/>
+                <span className='pl-3'>Loading...</span>
+                </>
+              ):'Sign Up'
+            }
+           </Button>
          </form>
          <div className='flex gap-2 text-sm mt-5'>
           <span>Have an account?</span>
@@ -55,6 +83,11 @@ const SignUp = () => {
             Sign in
           </Link>
          </div>
+         {errorMessage && (
+          <Alert className='mt-5' color='failure'>
+            {errorMessage}
+          </Alert>
+         )}
       </div>
     </div>
     </div>
