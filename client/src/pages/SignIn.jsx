@@ -2,11 +2,15 @@ import { Alert, Button, Label, Spinner, TextInput } from 'flowbite-react'
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { useDispatch,useSelector } from 'react-redux'
+import { signInFailure, signInStart, signInSuccess } from '../redux/user/userSlice'
 const SignIn = () => {
   const [inputData,setInputData] = useState('');
-  const [loading,setLoading] = useState(false)
+  // const [loading,setLoading] = useState(false)
+  const {loading,error} = useSelector(state=>state.user)
   const [errorMessage,setErrorMessage] = useState(null)
   const navigate = useNavigate()
+  const dispatch = useDispatch()
   const changeHandler = (e) =>{
     setInputData({
       ...inputData,[e.target.id]:e.target.value
@@ -15,22 +19,20 @@ const SignIn = () => {
   const submitHandler = async(e)=>{
     e.preventDefault()
     if(!inputData.email || !inputData.password){
-      return setErrorMessage('Please fill out all fields.')
+      return dispatch(signInFailure('Please fill out all fields.'))
     }
     try {
-      setLoading(true)
-      setErrorMessage(null)
+     dispatch(signInStart())
       const data = await axios.post('http://localhost:3000/api/auth/signin',inputData)
       console.log(data)
       if(data.success === false){
-        return setErrorMessage(data.message)
+        dispatch(signInFailure(data.message))
       }
-      setLoading(false)
+      dispatch(signInSuccess(data))
         navigate('/')
       
     } catch (error) {
-      setErrorMessage(error.message)
-      setLoading(false)
+      dispatch(signInFailure(error.message))
     }
 
   }
@@ -73,14 +75,14 @@ const SignIn = () => {
            </Button>
          </form>
          <div className='flex gap-2 text-sm mt-5'>
-          <span>New User?</span>
+          <span>Don't have an account?</span>
           <Link to='/signin' className='text-blue-500'>
             Sign up
           </Link>
          </div>
-         {errorMessage && (
+         {error && (
           <Alert className='mt-5' color='failure'>
-            {errorMessage}
+            {error}
           </Alert>
          )}
       </div>
