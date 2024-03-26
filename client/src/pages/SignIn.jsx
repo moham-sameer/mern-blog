@@ -8,7 +8,6 @@ const SignIn = () => {
   const [inputData,setInputData] = useState('');
   // const [loading,setLoading] = useState(false)
   const {loading,error} = useSelector(state=>state.user)
-  const [errorMessage,setErrorMessage] = useState(null)
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const changeHandler = (e) =>{
