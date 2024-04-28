@@ -1,12 +1,11 @@
 import User from "../model/user.model.js"
 import { errorHandler } from "../utils/error.js"
 import bcryptjs from 'bcryptjs'
-export const getData = (req,res)=>{
-    res.send("The API is working perfectly fine!")
-}
 
 export const updateUser = async(req,res,next)=>{
- if(req.user.id !== req.params.userId){
+    console.log("req.user.id:", req.user.id); 
+    console.log("req.params.userId:", req.params.userId);
+     if(req.user.id !== req.params.userId){
     return next(errorHandler(403,'You are not allowed to update this user'))
  }
  if(req.body.password){
